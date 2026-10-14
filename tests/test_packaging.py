@@ -13,6 +13,24 @@ spec.loader.exec_module(build)
 
 
 class PackagingTests(unittest.TestCase):
+    def test_disk_images_retry_only_transient_busy_errors_and_stop_after_three_attempts(self):
+        from subprocess import CalledProcessError, CompletedProcess
+        busy = CalledProcessError(16, ['hdiutil'], stderr='hdiutil: Resource busy')
+        with patch.object(build, 'run', side_effect=[busy, CompletedProcess([], 0, stdout='created')]) as run, \
+             patch.object(build.time, 'sleep') as sleep:
+            build.disk_image(Path('/staging'), Path('/output.dmg'))
+            self.assertEqual(run.call_count, 2)
+            sleep.assert_called_once_with(2)
+        with patch.object(build, 'run', side_effect=busy) as run, patch.object(build.time, 'sleep'), \
+             self.assertRaises(CalledProcessError):
+            build.disk_image(Path('/staging'), Path('/output.dmg'))
+        self.assertEqual(run.call_count, 3)
+        permanent = CalledProcessError(1, ['hdiutil'], stderr='Invalid argument')
+        with patch.object(build, 'run', side_effect=permanent) as run, \
+             self.assertRaises(CalledProcessError):
+            build.disk_image(Path('/staging'), Path('/output.dmg'))
+        self.assertEqual(run.call_count, 1)
+
     def test_im6_symlink_targets_keep_command_names_and_include_dynamic_codecs(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

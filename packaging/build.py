@@ -10,6 +10,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 import tomllib
 import urllib.request
 
@@ -185,6 +186,22 @@ def deb():
         ROOT/f'dist/release/WallpaperCutter-{version()}-linux-amd64.deb')
 
 
+def disk_image(staging, output):
+    # DiskImages can briefly return EBUSY on hosted macOS runners after signing.
+    for attempt in range(3):
+        try:
+            result = run('hdiutil', 'create', '-volname', 'Wallpaper Cutter',
+                         '-srcfolder', staging, '-ov', '-fs', 'HFS+', '-format', 'UDZO',
+                         output, capture_output=True, text=True)
+            print(result.stdout, flush=True)
+            return
+        except subprocess.CalledProcessError as error:
+            if attempt == 2 or 'Resource busy' not in (error.stderr or ''):
+                print(error.stderr, file=sys.stderr)
+                raise
+            time.sleep(2)
+
+
 def installer():
     (ROOT/'dist/release').mkdir(exist_ok=True)
     if sys.platform == 'win32':
@@ -197,8 +214,7 @@ def installer():
         staging.mkdir()
         shutil.copytree(ROOT/'dist/Wallpaper Cutter.app', staging/'Wallpaper Cutter.app', symlinks=True)
         (staging/'Applications').symlink_to('/Applications')
-        run('hdiutil', 'create', '-volname', 'Wallpaper Cutter', '-srcfolder', staging,
-            '-ov', '-format', 'UDZO', ROOT/f'dist/release/WallpaperCutter-{version()}-macos-{platform.machine()}.dmg')
+        disk_image(staging, ROOT/f'dist/release/WallpaperCutter-{version()}-macos-{platform.machine()}.dmg')
     else:
         appimage()
         deb()
