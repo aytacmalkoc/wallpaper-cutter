@@ -20,6 +20,7 @@ from . import core
 from . import desktop
 from . import platform_runtime
 from . import file_picker
+from . import __version__
 from .i18n import Translator
 
 LOG = logging.getLogger('wallpaper-cutter')
@@ -924,7 +925,7 @@ class Application(Gtk.Application):
 def main():
     translator = Translator(core.load_preferences()['language'])
     parser = argparse.ArgumentParser(description=translator.text('Çoklu ekran duvar kâğıdı düzenleyici'))
-    parser.add_argument('--version', action='version', version='Wallpaper Cutter 1.0.0')
+    parser.add_argument('--version', action='version', version=f'Wallpaper Cutter {__version__}')
     parser.add_argument('--image', help=translator.text('Başlangıçta açılacak yerel görsel'))
     parser.add_argument('--smoke', action='store_true', help=argparse.SUPPRESS)
     options = parser.parse_args()

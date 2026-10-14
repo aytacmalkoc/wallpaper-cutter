@@ -1,0 +1,4 @@
+#!/bin/sh
+# Resolve the AppDir, including AppImage extraction without FUSE.
+app_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+exec "$app_dir/usr/bin/wallpaper-cutter" "$@"

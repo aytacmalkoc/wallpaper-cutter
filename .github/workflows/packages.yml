@@ -1,0 +1,131 @@
+name: Desktop packages
+
+on:
+  push:
+    branches: [main, 'feat/**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  linux:
+    name: Linux packages
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Build isolated Debian runtime, AppImage and deb
+        run: |
+          docker build -t wallpaper-cutter-build -f packaging/linux/Dockerfile .
+          docker run --rm -v "$PWD:/work" wallpaper-cutter-build python packaging/build.py
+      - name: Test AppImage on a system without Python, GTK or ImageMagick
+        run: |
+          docker run --rm -v "$PWD/dist/release:/packages:ro" debian:12-slim sh -ec '
+            apt-get update -qq
+            apt-get install -y --no-install-recommends libgl1 libegl1 libx11-6 libxcb1 libxext6 libxrender1 libwayland-client0 fontconfig fonts-dejavu-core xvfb xauth dbus
+            export GSETTINGS_BACKEND=memory GDK_BACKEND=x11 GTK_A11Y=none GSK_RENDERER=cairo
+            dbus-run-session -- xvfb-run -a /packages/WallpaperCutter-*-linux-x86_64.AppImage --appimage-extract-and-run --package-check /tmp/package-check.json
+            cat /tmp/package-check.json
+          '
+      - name: Test deb installation and uninstallation in a disposable system
+        run: |
+          docker run --rm -v "$PWD/dist/release:/packages:ro" debian:12-slim sh -ec '
+            apt-get update -qq
+            apt-get install -y --no-install-recommends /packages/*.deb xvfb xauth dbus fonts-dejavu-core
+            export GSETTINGS_BACKEND=memory GDK_BACKEND=x11 GTK_A11Y=none GSK_RENDERER=cairo
+            dbus-run-session -- xvfb-run -a wallpaper-cutter --package-check /tmp/package-check.json
+            cat /tmp/package-check.json
+            apt-get remove -y wallpaper-cutter
+            test ! -e /opt/wallpaper-cutter/wallpaper-cutter
+          '
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-packages
+          path: dist/release/*
+          if-no-files-found: error
+
+  windows:
+    name: Windows package
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-python
+            mingw-w64-ucrt-x86_64-python-gobject
+            mingw-w64-ucrt-x86_64-python-cairo
+            mingw-w64-ucrt-x86_64-gtk4
+            mingw-w64-ucrt-x86_64-imagemagick
+            mingw-w64-ucrt-x86_64-pyinstaller
+            mingw-w64-ucrt-x86_64-python-pillow
+            mingw-w64-ucrt-x86_64-adwaita-icon-theme
+      - name: Build the native frozen executable and installer
+        shell: msys2 {0}
+        run: python packaging/build.py
+      - name: Test installed app without MSYS2 or Python on PATH, then uninstall
+        shell: pwsh
+        run: |
+          $installer = (Get-ChildItem dist/release/*-Setup.exe).FullName
+          $target = Join-Path $env:RUNNER_TEMP 'Wallpaper Cutter clean install'
+          $process = Start-Process -FilePath $installer -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', "/DIR=`"$target`"" -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw 'Installer failed' }
+          $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
+          $env:GSK_RENDERER = 'cairo'
+          $env:GTK_A11Y = 'none'
+          $report = Join-Path $env:RUNNER_TEMP 'windows-package-check.json'
+          $process = Start-Process -FilePath "$target/wallpaper-cutter.exe" -ArgumentList '--package-check', "`"$report`"" -Wait -PassThru
+          if (Test-Path $report) { Get-Content $report }
+          if ($process.ExitCode -ne 0 -or !(Test-Path $report)) { throw 'Package check failed' }
+          if (!(Get-Content $report -Raw | ConvertFrom-Json).success) { throw 'Invalid package check' }
+          $process = Start-Process -FilePath "$target/unins000.exe" -ArgumentList '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART' -Wait -PassThru
+          if ($process.ExitCode -ne 0 -or (Test-Path "$target/wallpaper-cutter.exe")) { throw 'Uninstall failed' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-package
+          path: dist/release/*
+          if-no-files-found: error
+
+  macos:
+    name: macOS package (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, macos-15-intel]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Install build runtime
+        run: |
+          brew install gtk4 pygobject3 imagemagick
+          python_formula=$(brew deps pygobject3 | sed -n '/^python@/p' | tail -1)
+          "$(brew --prefix "$python_formula")/bin/python${python_formula#python@}" -m venv --system-site-packages .venv
+          .venv/bin/python -m pip install pyinstaller==6.22.3 pillow pyobjc-framework-Cocoa
+      - name: Build app and disk image
+        run: .venv/bin/python packaging/build.py
+      - name: Test app copied from DMG without Homebrew on PATH
+        run: |
+          mkdir -p "$RUNNER_TEMP/mount" "$RUNNER_TEMP/install"
+          hdiutil attach dist/release/*.dmg -mountpoint "$RUNNER_TEMP/mount" -nobrowse
+          ditto "$RUNNER_TEMP/mount/Wallpaper Cutter.app" "$RUNNER_TEMP/install/Wallpaper Cutter.app"
+          hdiutil detach "$RUNNER_TEMP/mount"
+          env -u PYTHONPATH -u GI_TYPELIB_PATH PATH=/usr/bin:/bin:/usr/sbin:/sbin GTK_A11Y=none GSK_RENDERER=cairo \
+            "$RUNNER_TEMP/install/Wallpaper Cutter.app/Contents/MacOS/wallpaper-cutter" --package-check "$RUNNER_TEMP/macos-package-check.json"
+          cat "$RUNNER_TEMP/macos-package-check.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-package-${{ matrix.os }}
+          path: dist/release/*
+          if-no-files-found: error

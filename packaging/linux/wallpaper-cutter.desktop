@@ -12,4 +12,4 @@ StartupNotify=true
 StartupWMClass=io.github.local.WallpaperCutter
 Categories=Graphics;
 Keywords=wallpaper;monitor;crop;background;duvar;kâğıdı;
-X-Wallpaper-Cutter-Version=1.0.0
+X-Wallpaper-Cutter-Version=1.0.1
