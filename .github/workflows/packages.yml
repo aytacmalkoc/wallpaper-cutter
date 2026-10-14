@@ -24,19 +24,15 @@ jobs:
           docker run --rm -v "$PWD:/work" wallpaper-cutter-build python packaging/build.py
       - name: Test AppImage on a system without Python, GTK or ImageMagick
         run: |
-          docker run --rm -v "$PWD/dist/release:/packages:ro" debian:12-slim sh -ec '
-            apt-get update -qq
-            apt-get install -y --no-install-recommends libgl1 libegl1 libx11-6 libxcb1 libxext6 libxrender1 libwayland-client0 libwayland-egl1 libwayland-cursor0 fontconfig fonts-dejavu-core xvfb xauth dbus
-            export GSETTINGS_BACKEND=memory GDK_BACKEND=x11 GTK_A11Y=none GSK_RENDERER=cairo
+          docker build -t wallpaper-cutter-runtime-test -f packaging/linux/runtime-test.Dockerfile .
+          docker run --rm -v "$PWD/dist/release:/packages:ro" wallpaper-cutter-runtime-test sh -ec '
             dbus-run-session -- xvfb-run -a /packages/WallpaperCutter-*-linux-x86_64.AppImage --appimage-extract-and-run --package-check /tmp/package-check.json || { cat /tmp/package-check.json; exit 1; }
             cat /tmp/package-check.json
           '
       - name: Test deb installation and uninstallation in a disposable system
         run: |
-          docker run --rm -v "$PWD/dist/release:/packages:ro" debian:12-slim sh -ec '
-            apt-get update -qq
+          docker run --rm -v "$PWD/dist/release:/packages:ro" wallpaper-cutter-runtime-test sh -ec '
             apt-get install -y --no-install-recommends /packages/*.deb xvfb xauth dbus fonts-dejavu-core
-            export GSETTINGS_BACKEND=memory GDK_BACKEND=x11 GTK_A11Y=none GSK_RENDERER=cairo
             dbus-run-session -- xvfb-run -a wallpaper-cutter --package-check /tmp/package-check.json || { cat /tmp/package-check.json; exit 1; }
             cat /tmp/package-check.json
             apt-get remove -y wallpaper-cutter

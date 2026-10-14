@@ -25,7 +25,7 @@ class PackagingTests(unittest.TestCase):
             coders = prefix/'lib/x86_64-linux-gnu/ImageMagick-6.9/modules-Q16/coders'
             coders.mkdir(parents=True)
             (coders/'png.so').write_text('shared codec')
-            (coders/'png.la').write_text('not a loadable module')
+            (coders/'png.la').write_text("dlname='png.so'")
             config = prefix/'etc/ImageMagick-6'
             config.mkdir(parents=True)
             (config/'policy.xml').write_text('<policymap/>')
@@ -36,6 +36,7 @@ class PackagingTests(unittest.TestCase):
             names = {Path(source).name for source, _ in binaries}
             self.assertEqual(names, {'convert', 'identify', 'png.so'})
             self.assertIn((str(config/'policy.xml'), 'imagemagick/config'), datas)
+            self.assertIn((str(coders/'png.la'), 'imagemagick/modules'), datas)
             self.assertEqual((root/'build/image-bin/convert').read_text(), 'converter')
 
     def test_stable_versions_required_before_creating_installers(self):

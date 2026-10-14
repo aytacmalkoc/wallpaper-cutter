@@ -65,6 +65,9 @@ def image_inventory(executable):
         for path in directory.iterdir():
             if path.suffix in ('.so', '.dll', '.dylib'):
                 binaries.append((str(path), 'imagemagick/modules'))
+            elif path.suffix == '.la':
+                # ImageMagick's libltdl loader looks up these descriptors first.
+                datas.append((str(path), 'imagemagick/modules'))
     # IM6 executables are symlinks on Debian; retain the names core.magick uses.
     stage = ROOT/'build/image-bin'
     stage.mkdir(parents=True, exist_ok=True)
