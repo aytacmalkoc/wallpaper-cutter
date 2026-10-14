@@ -51,8 +51,8 @@ Windows and macOS adapters require a retrievable previous desktop image.
 run on Linux. Windows/macOS and non-GNOME Linux adapters have injected API contract
 tests. Their interactive desktop sessions have not been verified in the current
 development environment.
-See [TESTING.md](docs/TESTING.md). Ready-made signed Windows installers and macOS app
-bundles are not included; the source runs with the runtime dependencies below.
+See [TESTING.md](docs/TESTING.md). Release packages include their runtime;
+Windows/macOS packages are currently unsigned.
 
 ## Install
 

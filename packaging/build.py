@@ -163,7 +163,7 @@ def deb():
     (directory/'DEBIAN/control').write_text(
         f'Package: wallpaper-cutter\nVersion: {version()}\nArchitecture: amd64\n'
         'Maintainer: Wallpaper Cutter contributors\nSection: graphics\nPriority: optional\n'
-        'Depends: libc6 (>= 2.36), libgl1, libegl1, libx11-6, libxcb1, libxext6, libxrender1, libwayland-client0, fontconfig\n'
+        'Depends: libc6 (>= 2.36), libgl1, libegl1, libx11-6, libxcb1, libxext6, libxrender1, libwayland-client0, libwayland-egl1, libwayland-cursor0, fontconfig\n'
         'Homepage: https://github.com/aytacmalkoc/wallpaper-cutter\n'
         'Description: Compose one wallpaper across multiple displays\n'
         ' Includes its private Python, GTK and ImageMagick runtime.\n')

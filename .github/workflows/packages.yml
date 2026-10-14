@@ -2,7 +2,7 @@ name: Desktop packages
 
 on:
   push:
-    branches: [main, 'feat/**']
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
@@ -26,9 +26,9 @@ jobs:
         run: |
           docker run --rm -v "$PWD/dist/release:/packages:ro" debian:12-slim sh -ec '
             apt-get update -qq
-            apt-get install -y --no-install-recommends libgl1 libegl1 libx11-6 libxcb1 libxext6 libxrender1 libwayland-client0 fontconfig fonts-dejavu-core xvfb xauth dbus
+            apt-get install -y --no-install-recommends libgl1 libegl1 libx11-6 libxcb1 libxext6 libxrender1 libwayland-client0 libwayland-egl1 libwayland-cursor0 fontconfig fonts-dejavu-core xvfb xauth dbus
             export GSETTINGS_BACKEND=memory GDK_BACKEND=x11 GTK_A11Y=none GSK_RENDERER=cairo
-            dbus-run-session -- xvfb-run -a /packages/WallpaperCutter-*-linux-x86_64.AppImage --appimage-extract-and-run --package-check /tmp/package-check.json
+            dbus-run-session -- xvfb-run -a /packages/WallpaperCutter-*-linux-x86_64.AppImage --appimage-extract-and-run --package-check /tmp/package-check.json || { cat /tmp/package-check.json; exit 1; }
             cat /tmp/package-check.json
           '
       - name: Test deb installation and uninstallation in a disposable system
@@ -37,7 +37,7 @@ jobs:
             apt-get update -qq
             apt-get install -y --no-install-recommends /packages/*.deb xvfb xauth dbus fonts-dejavu-core
             export GSETTINGS_BACKEND=memory GDK_BACKEND=x11 GTK_A11Y=none GSK_RENDERER=cairo
-            dbus-run-session -- xvfb-run -a wallpaper-cutter --package-check /tmp/package-check.json
+            dbus-run-session -- xvfb-run -a wallpaper-cutter --package-check /tmp/package-check.json || { cat /tmp/package-check.json; exit 1; }
             cat /tmp/package-check.json
             apt-get remove -y wallpaper-cutter
             test ! -e /opt/wallpaper-cutter/wallpaper-cutter
@@ -122,7 +122,7 @@ jobs:
           ditto "$RUNNER_TEMP/mount/Wallpaper Cutter.app" "$RUNNER_TEMP/install/Wallpaper Cutter.app"
           hdiutil detach "$RUNNER_TEMP/mount"
           env -u PYTHONPATH -u GI_TYPELIB_PATH PATH=/usr/bin:/bin:/usr/sbin:/sbin GTK_A11Y=none GSK_RENDERER=cairo \
-            "$RUNNER_TEMP/install/Wallpaper Cutter.app/Contents/MacOS/wallpaper-cutter" --package-check "$RUNNER_TEMP/macos-package-check.json"
+            "$RUNNER_TEMP/install/Wallpaper Cutter.app/Contents/MacOS/wallpaper-cutter" --package-check "$RUNNER_TEMP/macos-package-check.json" || { cat "$RUNNER_TEMP/macos-package-check.json"; exit 1; }
           cat "$RUNNER_TEMP/macos-package-check.json"
       - uses: actions/upload-artifact@v4
         with:
