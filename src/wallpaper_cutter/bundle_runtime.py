@@ -26,6 +26,7 @@ def package_check(report):
     import traceback
     result = {'version': None, 'checks': [], 'success': False}
     try:
+        os.environ['MAGICK_DEBUG'] = 'Module'
         import gi
         import cairo
         gi.require_version('Gtk', '4.0')
@@ -74,6 +75,9 @@ def package_check(report):
         result['success'] = True
     except Exception:
         result['error'] = traceback.format_exc()
+        modules = Path(os.environ.get('MAGICK_CODER_MODULE_PATH', '/nonexistent'))
+        result['runtime'] = {'module_path': str(modules),
+                             'modules': sorted(path.name for path in modules.glob('*'))}
     report = Path(report)
     report.parent.mkdir(parents=True, exist_ok=True)
     report.write_text(json.dumps(result, indent=2), encoding='utf-8')
