@@ -67,7 +67,12 @@ def image_inventory(executable):
                 binaries.append((str(path), 'imagemagick/modules'))
             elif path.suffix == '.la':
                 # ImageMagick's libltdl loader looks up these descriptors first.
-                datas.append((str(path), 'imagemagick/modules'))
+                # Do not fall back to the build machine's absolute library path.
+                target = ROOT/'build/module-descriptors'/path.name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                text = re.sub(r"(?m)^libdir=.*$", "libdir=''", path.read_text())
+                target.write_text(text)
+                datas.append((str(target), 'imagemagick/modules'))
     # IM6 executables are symlinks on Debian; retain the names core.magick uses.
     stage = ROOT/'build/image-bin'
     stage.mkdir(parents=True, exist_ok=True)
@@ -163,8 +168,14 @@ def deb():
     icon = directory/'usr/share/icons/hicolor/256x256/apps/io.github.local.WallpaperCutter.png'
     icon.parent.mkdir(parents=True)
     shutil.copy2(ICON, icon)
+    copyright_file = directory/'usr/share/doc/wallpaper-cutter/copyright'
+    copyright_file.parent.mkdir(parents=True)
+    copyright_file.write_text((ROOT/'LICENSE').read_text()+'\n'+(ROOT/'LICENSE.upstream').read_text())
+    size = sum(path.stat().st_size for path in directory.rglob('*')
+               if path.is_file() and not path.is_symlink()) // 1024
     (directory/'DEBIAN/control').write_text(
         f'Package: wallpaper-cutter\nVersion: {version()}\nArchitecture: amd64\n'
+        f'Installed-Size: {size}\n'
         'Maintainer: Wallpaper Cutter contributors\nSection: graphics\nPriority: optional\n'
         'Depends: libc6 (>= 2.36), libgl1, libegl1, libx11-6, libxcb1, libxext6, libxrender1, libwayland-client0, libwayland-egl1, libwayland-cursor0, fontconfig\n'
         'Homepage: https://github.com/aytacmalkoc/wallpaper-cutter\n'
