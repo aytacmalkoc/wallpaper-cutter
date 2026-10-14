@@ -80,7 +80,8 @@ GTK tests and is **not** equivalent to running the complete suite.
 
 `test_bundle_runtime.BundleRuntimeTests` verifies private runtime paths, unchanged
 source environments, failure reports and version consistency. Native artifact
-checks exercise GTK/icons, all supported image formats, multi-display export and
+checks exercise GTK/icons, the editor window and preview drawing, all supported
+image formats, multi-display export and
 layout import from the installed package; see [PACKAGING.md](PACKAGING.md).
 They do not apply wallpapers to CI desktops.
 

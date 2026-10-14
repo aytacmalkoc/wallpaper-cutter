@@ -35,7 +35,8 @@ and are not configured. These initial binaries are unsigned.
 
 Every PR builds the four native targets. Each executable's internal
 `--package-check <report.json>` runs in temporary directories and exercises GTK
-windows/icons, Cairo, PNG preview, JPEG/WebP/BMP/TIFF codecs, a two-display
+windows/icons, Cairo, the real editor window and preview drawing, PNG preview,
+JPEG/WebP/BMP/TIFF codecs, a two-display
 export and layout import. It never applies a wallpaper.
 
 Linux checks use fresh Debian containers with no Python/GTK/ImageMagick installed;

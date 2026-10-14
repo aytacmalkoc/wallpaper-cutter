@@ -12,6 +12,7 @@ PACKAGE_FILES = ('__init__.py', '__main__.py', 'app.py', 'core.py', 'desktop.py'
                  'backends/windows.py', 'backends/macos.py', 'assets/demo-wallpaper.png',
                  'assets/io.github.local.WallpaperCutter.png')
 FILES = ('scripts/run.py', 'LICENSE', 'LICENSE.upstream', 'README.md', 'CHANGELOG.md', 'docs/TESTING.md',
+         'docs/INSTALLATION.md', 'docs/PACKAGING.md',
          *(f'src/wallpaper_cutter/{name}' for name in PACKAGE_FILES))
 LEGACY_FILES = ('app.py', 'core.py', 'desktop.py', 'i18n.py', 'platform_runtime.py', 'wallpaper_backends.py',
                 'native_windows.py', 'native_macos.py', 'file_picker.py', 'demo-wallpaper.png',

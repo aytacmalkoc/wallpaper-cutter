@@ -31,7 +31,7 @@ def package_check(report):
         import cairo
         gi.require_version('Gtk', '4.0')
         gi.require_version('GdkPixbuf', '2.0')
-        from gi.repository import Gtk, GdkPixbuf
+        from gi.repository import Gtk, GdkPixbuf, Gio
         from . import __version__, core, desktop
         result['version'] = __version__
         Gtk.init()
@@ -53,6 +53,21 @@ def package_check(report):
                 core.magick([source, str(converted)])
                 assert core.inspect(converted)['width'] == 220
                 result['checks'].append(suffix+'-decode')
+            from .app import Window
+            application = Gtk.Application(application_id='io.github.aytacmalkoc.WallpaperCutter.PackageCheck',
+                                          flags=Gio.ApplicationFlags.NON_UNIQUE)
+            application.register(None)
+            editor = Window(application)
+            try:
+                editor.loaded(image)
+                preview = cairo.ImageSurface(cairo.FORMAT_ARGB32, 800, 500)
+                editor.draw(editor.canvas, cairo.Context(preview), 800, 500)
+                assert editor.monitors
+                result['checks'].append('application-window-image-preview')
+            finally:
+                editor.closing()
+                editor.pool.shutdown(wait=True, cancel_futures=True)
+                editor.destroy()
             monitors = [dict(name=name, x=x, y=0, width=100, height=80,
                              pixelWidth=100, pixelHeight=80, scale=1)
                         for name, x in [('left', 0), ('right', 100)]]
