@@ -35,6 +35,24 @@ class BundleRuntimeTests(unittest.TestCase):
             self.assertFalse(result['success'])
             self.assertIn('error', result)
 
+    def test_system_tools_use_host_libraries_without_changing_image_runtime(self):
+        from wallpaper_cutter.backends.desktop import XfceBackend
+        env = {'LD_LIBRARY_PATH': '/bundle', 'LD_LIBRARY_PATH_ORIG': '/host',
+               'DYLD_LIBRARY_PATH': '/bundle', 'GIO_MODULE_DIR': '/bundle/gio',
+               'DISPLAY': ':99'}
+        with patch.object(sys, 'frozen', True, create=True):
+            host = bundle_runtime.host_environment(env)
+            self.assertEqual(host['LD_LIBRARY_PATH'], '/host')
+            self.assertNotIn('DYLD_LIBRARY_PATH', host)
+            self.assertNotIn('GIO_MODULE_DIR', host)
+            self.assertEqual(env['LD_LIBRARY_PATH'], '/bundle')
+            with patch.dict(bundle_runtime.os.environ, env, clear=True), \
+                 patch('wallpaper_cutter.backends.desktop.subprocess.run') as run:
+                XfceBackend.query('-l')
+                self.assertEqual(run.call_args.kwargs['env'], host)
+        with patch.object(sys, 'frozen', False, create=True):
+            self.assertEqual(bundle_runtime.host_environment(env), env)
+
     def test_versions_and_runtime_files_stay_consistent(self):
         import tomllib
         from scripts import install

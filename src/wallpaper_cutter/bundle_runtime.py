@@ -19,6 +19,20 @@ def configure(root=None, environment=None):
     env['MAGICK_FILTER_MODULE_PATH'] = str(image/'filters')
 
 
+def host_environment(environment=None):
+    """System desktop utilities must load the host's libraries, not our GTK."""
+    env = dict(os.environ if environment is None else environment)
+    if getattr(sys, 'frozen', False):
+        for name in ('LD_LIBRARY_PATH', 'DYLD_LIBRARY_PATH'):
+            original = env.get(name+'_ORIG')
+            if original is None:
+                env.pop(name, None)
+            else:
+                env[name] = original
+        env.pop('GIO_MODULE_DIR', None)
+    return env
+
+
 def package_check(report):
     """Exercise bundled GTK, codecs and real export in disposable directories."""
     import json
