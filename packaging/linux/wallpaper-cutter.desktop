@@ -1,0 +1,15 @@
+[Desktop Entry]
+Type=Application
+Name=Wallpaper Cutter
+GenericName=Multi-monitor Wallpaper Editor
+Comment=Crop, align and apply images across your displays
+Comment[tr]=Görselleri ekranlarına göre kırp, hizala ve duvar kâğıdı olarak uygula
+Exec=@LAUNCHER@
+TryExec=@LAUNCHER@
+Icon=io.github.local.WallpaperCutter
+Terminal=false
+StartupNotify=true
+StartupWMClass=io.github.local.WallpaperCutter
+Categories=Graphics;
+Keywords=wallpaper;monitor;crop;background;duvar;kâğıdı;
+X-Wallpaper-Cutter-Version=1.0.0

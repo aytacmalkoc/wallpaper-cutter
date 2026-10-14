@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wallpaper-cutter"
+version = "1.0.0"
+description = "A cross-platform editor for composing one wallpaper across multiple displays"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE", "LICENSE.upstream"]
+
+[project.scripts]
+wallpaper-cutter = "wallpaper_cutter.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+wallpaper_cutter = ["assets/*.png"]

@@ -1,0 +1,105 @@
+name: Bug report
+description: Report a problem with installation, editing, export or wallpaper application.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe one problem per report. Include only relevant, redacted logs and screenshots;
+        you do not need to share your original wallpaper image.
+  - type: checkboxes
+    id: existing-issues
+    attributes:
+      label: Existing reports
+      options:
+        - label: I searched existing issues and could not find the same problem.
+          required: true
+  - type: input
+    id: version
+    attributes:
+      label: Application version or commit
+      description: Run python scripts/run.py --version, or write unknown if the app cannot start.
+      placeholder: "1.0.0 / commit hash / unknown"
+    validations:
+      required: true
+  - type: dropdown
+    id: installation
+    attributes:
+      label: Installation method
+      options:
+        - Source checkout (scripts/run.py)
+        - Per-user installer (scripts/install.py)
+        - Python package / editable install
+        - Other or unsure
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Operating system
+      options:
+        - Linux
+        - Windows
+        - macOS
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include OS/version, Linux distribution and desktop/compositor/session where applicable. Add runtime versions if available.
+      placeholder: |
+        OS and version:
+        Desktop/compositor and version:
+        Session (Wayland / X11 / not applicable):
+        Python, GTK, PyGObject and ImageMagick versions (if known):
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Start from opening the app. For intermittent failures, describe what happened before the failure and how often it occurs.
+      placeholder: |
+        1. Open ...
+        2. Adjust ...
+        3. Click ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: Describe what you expected the app to do.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Describe what happened and include the exact error text, if any.
+    validations:
+      required: true
+  - type: textarea
+    id: composition
+    attributes:
+      label: Display and image details
+      description: Optional; helpful for preview, crop, zoom, alignment and wallpaper problems.
+      placeholder: |
+        Display resolutions, positions, scaling and rotation:
+        Image format and dimensions:
+        Image zoom and preview scale:
+        Does export work? Does automatic apply or restore fail?
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Launch from a terminal and paste relevant output. Redact private information; no Markdown code fences are needed.
+      render: shell
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or additional context
+      description: Optional; attach a screenshot or a redacted sample layout if it helps reproduce the problem.

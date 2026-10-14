@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "monitors": [
+    {
+      "name": "DP-1",
+      "width": 1920.0,
+      "height": 1080.0,
+      "scale": 1.0
+    },
+    {
+      "name": "HDMI-1",
+      "width": 1920.0,
+      "height": 1080.0,
+      "scale": 1.0
+    }
+  ],
+  "panorama": "3840x1080",
+  "apply_restore": "GNOME light/dark background restored exactly"
+}

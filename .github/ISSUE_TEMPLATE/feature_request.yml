@@ -1,0 +1,41 @@
+name: Feature request
+description: Suggest an improvement or a new desktop integration.
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: checkboxes
+    id: existing-requests
+    attributes:
+      label: Existing requests
+      options:
+        - label: I searched existing issues and could not find the same request.
+          required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: Describe the task you are trying to accomplish and what currently makes it difficult.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Explain how the feature should work from the user's perspective.
+    validations:
+      required: true
+  - type: textarea
+    id: platforms
+    attributes:
+      label: Platforms or desktops affected
+      description: Include relevant operating systems, desktop environments and display setups, or write all platforms.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives or current workaround
+      description: Optional; describe what you use today or other approaches you considered.
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Optional; include examples, sketches or references.
