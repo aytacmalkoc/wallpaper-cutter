@@ -1,0 +1,3 @@
+#!/bin/sh
+echo 'ERROR: the frozen application selected host ImageMagick instead of its private runtime' >&2
+exit 91

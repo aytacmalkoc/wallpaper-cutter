@@ -1,6 +1,7 @@
 """Locate the private image runtime in a frozen desktop distribution."""
 import os
 from pathlib import Path
+import shutil
 import sys
 
 
@@ -17,6 +18,15 @@ def configure(root=None, environment=None):
     env['MAGICK_CONFIGURE_PATH'] = str(image/'config')
     env['MAGICK_CODER_MODULE_PATH'] = str(image/'modules')
     env['MAGICK_FILTER_MODULE_PATH'] = str(image/'filters')
+
+
+def image_executable(name):
+    """Frozen IM6 bundles must not accidentally select a host IM7 executable."""
+    if not getattr(sys, 'frozen', False):
+        return shutil.which(name)
+    suffix = '.exe' if sys.platform == 'win32' else ''
+    executable = Path(sys._MEIPASS)/'imagemagick/bin'/(name+suffix)
+    return str(executable) if executable.is_file() else None
 
 
 def host_environment(environment=None):

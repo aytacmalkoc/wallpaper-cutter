@@ -12,6 +12,7 @@ import tempfile
 import uuid
 from contextlib import contextmanager
 from . import platform_runtime
+from .bundle_runtime import image_executable
 
 CONFIG, STATE = platform_runtime.directories()
 
@@ -106,12 +107,12 @@ def gdk_monitors():
 
 def magick(arguments, stdin=None):
     arguments = list(map(str, arguments))
-    command = shutil.which('magick')
+    command = image_executable('magick')
     if command:
         invocation = [command, *arguments]
-    elif sys.platform != 'win32' and shutil.which('convert') and shutil.which('identify'):
+    elif sys.platform != 'win32' and image_executable('convert') and image_executable('identify'):
         # ImageMagick 6 is still packaged by several Linux distributions.
-        invocation = [shutil.which('identify'), *arguments[1:]] if arguments and arguments[0] == 'identify' else [shutil.which('convert'), *arguments]
+        invocation = [image_executable('identify'), *arguments[1:]] if arguments and arguments[0] == 'identify' else [image_executable('convert'), *arguments]
     else:
         raise RuntimeError('ImageMagick is missing. Install ImageMagick and add it to PATH.')
     try:
