@@ -17,6 +17,29 @@ class BundleRuntimeTests(unittest.TestCase):
             bundle_runtime.configure(environment=env)
         self.assertEqual(env, {'PATH': '/system/tools'})
 
+    def test_private_im6_never_selects_host_im7_and_missing_tools_fail_closed(self):
+        from wallpaper_cutter import core
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            tools = root/'imagemagick/bin'
+            tools.mkdir(parents=True)
+            for name in ('convert', 'identify'):
+                (tools/name).touch()
+            with patch.object(sys, 'frozen', True, create=True), \
+                 patch.object(sys, '_MEIPASS', str(root), create=True), \
+                 patch.object(sys, 'platform', 'linux'), \
+                 patch.object(bundle_runtime.shutil, 'which', return_value='/usr/bin/magick') as host, \
+                 patch.object(core.subprocess, 'run') as run:
+                run.return_value.stdout = b'220 100'
+                core.magick(['identify', 'source.png'])
+                self.assertEqual(run.call_args.args[0], [str(tools/'identify'), 'source.png'])
+                core.magick(['source.png', 'output.png'])
+                self.assertEqual(run.call_args.args[0][0], str(tools/'convert'))
+                (tools/'convert').unlink()
+                with self.assertRaisesRegex(RuntimeError, 'ImageMagick is missing'):
+                    core.magick(['source.png'])
+                host.assert_not_called()
+
     def test_frozen_tools_precede_host_tools_and_coders_ignore_host_settings(self):
         env = {'PATH': '/system/tools', 'MAGICK_CODER_MODULE_PATH': '/host/coders'}
         root = Path('/bundle with spaces')

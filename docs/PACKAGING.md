@@ -40,7 +40,10 @@ JPEG/WebP/BMP/TIFF codecs, a two-display
 export and layout import. It never applies a wallpaper.
 
 Linux checks use fresh Debian containers with no Python/GTK/ImageMagick installed;
-both AppImage extraction and deb install/uninstall are exercised. Windows checks
+both AppImage extraction and deb install/uninstall are exercised. The Linux tests
+also run with a deliberately failing host `magick` sentinel on PATH, verifying
+that bundled ImageMagick 6 tools cannot be overridden by an installed version 7.
+Windows checks
 install the setup executable in a path with spaces, remove MSYS2 from PATH, run
 the app and uninstall. macOS checks mount the DMG, copy the app to a separate
 location and remove Homebrew from PATH. Native wallpaper integration still
