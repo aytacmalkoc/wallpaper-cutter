@@ -76,6 +76,15 @@ GTK tests and is **not** equivalent to running the complete suite.
 | Modern chooser selection and GTK 4.0 fallback selection/save/cancel/error cleanup | `test_file_picker.FilePickerTests` |
 | macOS/Windows installer paths, copied modules and launcher generation | runtime installer tests |
 
+## Desktop distribution checks
+
+`test_bundle_runtime.BundleRuntimeTests` verifies private runtime paths, unchanged
+source environments, failure reports and version consistency. Native artifact
+checks exercise GTK/icons, the editor window and preview drawing, all supported
+image formats, multi-display export and
+layout import from the installed package; see [PACKAGING.md](PACKAGING.md).
+They do not apply wallpapers to CI desktops.
+
 ## Source layout
 
 Production code is imported from `src/wallpaper_cutter`, including the `backends`

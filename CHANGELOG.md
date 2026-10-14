@@ -5,6 +5,21 @@ follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+## 1.0.1 - 2026-10-14
+
+### Added
+
+- Self-contained Linux AppImage and Debian packages, a Windows setup executable,
+  and macOS disk images for Intel and Apple Silicon.
+- Native build jobs and package checks covering GTK, icons, image codecs,
+  two-display export and layout import without changing desktop wallpapers.
+- Bundled runtime notices and SHA-256 checksums for release downloads.
+
+### Changed
+
+- Short download/install instructions in the README; source setup and package
+  maintenance instructions now live in dedicated guides.
+
 ## 1.0.0 - 2026-10-14
 
 ### Added

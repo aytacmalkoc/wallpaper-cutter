@@ -83,7 +83,8 @@ class InstallTests(IsolatedTest):
         self.assertIn('scripts/run.py', launcher.read_text())
         version = subprocess.run([str(launcher), '--version'], env=self.env, capture_output=True, text=True)
         self.assertEqual(version.returncode, 0, version.stderr)
-        self.assertIn('Wallpaper Cutter 1.0.0', version.stdout)
+        from wallpaper_cutter import __version__
+        self.assertIn('Wallpaper Cutter '+__version__, version.stdout)
 
     def test_unrelated_launcher_is_not_overwritten(self):
         launcher = self.home/'.local/bin/wallpaper-cutter'

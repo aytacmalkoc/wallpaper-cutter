@@ -97,8 +97,10 @@ class XfceBackend:
 
     @staticmethod
     def query(*arguments):
+        from ..bundle_runtime import host_environment
         return subprocess.run(['xfconf-query', '-c', 'xfce4-desktop', *arguments],
-                              check=True, capture_output=True, text=True, timeout=5).stdout.rstrip('\r\n')
+                              check=True, capture_output=True, text=True, timeout=5,
+                              env=host_environment()).stdout.rstrip('\r\n')
 
     def capture(self):
         properties = self.query('-l').splitlines()

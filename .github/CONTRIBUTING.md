@@ -8,7 +8,7 @@ request before spending time on a large implementation.
 ## Development setup
 
 1. Fork the repository and create a branch for your change.
-2. Install the dependencies for your platform from [README.md](../README.md).
+2. Install the source dependencies for your platform from [INSTALLATION.md](../docs/INSTALLATION.md).
    Use the same Python environment for development and the application.
 3. From the repository root, run:
 
